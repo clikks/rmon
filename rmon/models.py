@@ -5,6 +5,8 @@ and serialize class
 
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from rmon.common.rest import RestException
+from redis import StrictRedis, RedisError
 
 db = SQLAlchemy()
 
@@ -37,4 +39,29 @@ class Server(db.Model):
         """
         db.session.delete(self)
         db.session.commit()
+
+    @property
+    def redis(self):
+        return StrictRedis(host=self.host, port=self.port, password=self.password)
+    
+    def ping(self):
+        """check whether Redis server can be accessed
+        """
+        try:
+            return self.redis.ping()
+        except RedisError:
+            raise RestException(400, 'redis server %s can not connected' % self.host)
+
+    def get_metrics(self):
+        """get Redis server monitor info
+        from Redis server command 'INFO',return monitor info.
+        reference https://redis.io/commands/INFO
+        """
+        try:
+            return self.redis.info()
+        except RedisError:
+            raise RestException(400, 'redis server %s can not connected' % self.host)
+
+
+
 
