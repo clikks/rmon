@@ -24,7 +24,7 @@ def server(db):
     """test Redis server record
     """
 
-    server = Server(name='redis_test', description='this is a test record',
+    server = Server(name='redis_fixtures', description='this is a test record',
                     host='127.0.0.1', port='6379')
     server.save()
     return server
